@@ -1,38 +1,50 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
-import streamlit as st
+import time
+from datetime import datetime
+import requests
 
-"""
-# Welcome to Streamlit!
+url = "https://i.instagram.com/api/v1/direct_v2/get_presence/"
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+headers = {
+    'x-csrftoken': 'JIqamHNQRJlbPXMsGxpbhk2KY0Vzmgn9',
+    'x-ig-app-id': '936619743392459',
+    'cookie': 'ig_did=50A7C5AA-6647-45F1-B7AA-643341B08B3D; ig_nrcb=1; mid=YXhEXAALAAEd8OHslYccyq4NDOdn; '
+              'fbm_124024574287414=base_domain=.instagram.com; ds_user_id=8438207407; '
+              'sessionid=8438207407%3AOSGm5mPgUiLYqW%3A19; csrftoken=JIqamHNQRJlbPXMsGxpbhk2KY0Vzmgn9; '
+              'datr=JvuYYhqnj2y_1ysUAv5FQb95; '
+              'shbid="10740\\0548438207407\\0541686922381'
+              ':01f76e266bb173cf5894ff44fce9dc5f4cc3f5b9b154253229668bad9b161e861c77aa45"; '
+              'shbts="1655386381\\0548438207407\\0541686922381'
+              ':01f794891fec74b0577be9248cd6a0eeb74f51e2d1509b99272a221dbf19ab26580b2972"; '
+              'rur="CLN\\0548438207407\\0541686922464'
+              ':01f73872e1c3f5981901f7dfbca0ac06780406c66c75426cfb9969921427d0046018406e"; '
+              'csrftoken=JIqamHNQRJlbPXMsGxpbhk2KY0Vzmgn9; ds_user_id=8438207407; '
+              'ig_did=00BE72C3-CBC1-43BC-8619-38634F78E074; ig_nrcb=1; mid=Yf5GdwAEAAH3pj7rycxkj8mALiei; '
+              'shbid="10740\\0548438207407\\0541686922052'
+              ':01f73d7edd3c45331b08b183ac1ffa264dee328d00ad29f0297d741d935e7b10b04810ff"; '
+              'shbts="1655386052\\0548438207407\\0541686922052'
+              ':01f7805b8e599ed966171845f4bacceea6a828cda763d2c640766934a9417eac85b0dc6e" '
+}
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+def get_status():
+    response = requests.get(url, headers=headers)
+    is_active = response.json()['user_presence']['38490942936']['is_active']
+    timestamp = int(str(response.json()['user_presence']['38490942936']['last_activity_at_ms'])[:10])
+    last_activity = datetime.fromtimestamp(timestamp).time()
+    return is_active, last_activity
 
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+is_still_offline = False
+is_still_online = False
 
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+while True:
+    status = get_status()
+    if not status[0] and not is_still_offline:
+        print('Offline since:', status[1])
+        is_still_offline = True
+        is_still_online = False
+    elif status[0] and not is_still_online:
+        print('Online since:', status[1])
+        is_still_offline = False
+        is_still_online = True
+    time.sleep(2)

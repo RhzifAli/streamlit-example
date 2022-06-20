@@ -54,7 +54,7 @@ while True:
         except Exception:
             print("Currently offline")
     elif status[0] and not is_still_online:
-        st.title(status[1], '| Online', end=' ')
+        st.title(status[1], '| Online')
         is_still_offline = False
         is_still_online = True
     old_status = str(status[1]).split(':')

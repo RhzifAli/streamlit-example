@@ -34,17 +34,24 @@ def get_status():
     return is_active, last_activity
 
 
+# 48936407918
 is_still_offline = False
 is_still_online = False
 
 while True:
     status = get_status()
+
     if not status[0] and not is_still_offline:
-        print('Offline since:', status[1])
-        is_still_offline = True
-        is_still_online = False
+        try:
+            time_spent = f"{int(str(status[1]).split(':')[0]) - int(old_status[0]) * 60 + int(str(status[1]).split(':')[1]) - int(old_status[1])} minutes and {int(str(status[1]).split(':')[2]) - int(old_status[2])} seconds |"
+            print("for", time_spent, status[1])
+            is_still_offline = True
+            is_still_online = False
+        except Exception:
+            print("Currently offline")
     elif status[0] and not is_still_online:
-        print('Online since:', status[1])
+        print(status[1], '| Online', end=' ')
         is_still_offline = False
         is_still_online = True
+    old_status = str(status[1]).split(':')
     time.sleep(2)

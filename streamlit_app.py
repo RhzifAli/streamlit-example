@@ -3,6 +3,9 @@ import time
 from datetime import datetime
 import requests
 
+
+st.set_page_config(page_title="My Webpage", page_icon=":tada:", layout="wide")
+
 url = "https://i.instagram.com/api/v1/direct_v2/get_presence/"
 
 headers = {
@@ -45,13 +48,13 @@ while True:
     if not status[0] and not is_still_offline:
         try:
             time_spent = f"{int(str(status[1]).split(':')[0]) - int(old_status[0]) * 60 + int(str(status[1]).split(':')[1]) - int(old_status[1])} minutes and {int(str(status[1]).split(':')[2]) - int(old_status[2])} seconds |"
-            print("for", time_spent, status[1])
+            st.title("for", time_spent, status[1])
             is_still_offline = True
             is_still_online = False
         except Exception:
             print("Currently offline")
     elif status[0] and not is_still_online:
-        print(status[1], '| Online', end=' ')
+        st.title(status[1], '| Online', end=' ')
         is_still_offline = False
         is_still_online = True
     old_status = str(status[1]).split(':')

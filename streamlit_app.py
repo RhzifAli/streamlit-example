@@ -32,8 +32,8 @@ headers = {
 
 def get_status():
     response = requests.get(url, headers=headers)
-    is_active = response.json()['user_presence']['38490942936']['is_active']
-    timestamp = int(str(response.json()['user_presence']['38490942936']['last_activity_at_ms'])[:10])
+    is_active = response.json()['user_presence']['48936407918']['is_active']
+    timestamp = int(str(response.json()['user_presence']['48936407918']['last_activity_at_ms'])[:10])
     last_activity = datetime.fromtimestamp(timestamp).time()
     return is_active, last_activity
 
